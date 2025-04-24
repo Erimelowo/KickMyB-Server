@@ -1,13 +1,16 @@
 package org.kickmyb.server.task;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.joda.time.DateTime;
 import org.kickmyb.server.account.MUser;
 import org.kickmyb.server.account.MUserRepository;
 import org.kickmyb.transfer.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.rmi.AccessException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -178,6 +181,27 @@ public class ServiceTaskImpl implements ServiceTask {
         }
 
         return response;
+    }
+
+    @Override
+    public void delete(long taskID, MUser user) throws NotOwner, TaskNotFound {
+        // Est-ce qu'une tâche avec cet ID existe ?
+        if (repo.findById(taskID).isEmpty()) throw new TaskNotFound();
+
+        // Est-ce que l'user a la tâche?
+        var userTasks = new ArrayList<>(user.tasks);
+        for (MTask task : userTasks) {
+            if (task.id == taskID) {
+                // Supprimer la tâche
+                user.tasks.remove(task);
+                repoUser.save(user);
+                repo.deleteById(taskID);
+                return; // On saute le reste de la méthode
+            }
+        }
+
+        // Le return n'a pas trigger, donc l'utilisateur n'a pas la tâche
+        throw new NotOwner();
     }
 
 }

@@ -57,6 +57,15 @@ public class ControllerTask {
         return serviceTask.detail(id, user);
     }
 
+    @DeleteMapping(value = "/api/delete/{taskID}", produces = "text/plain")
+    public @ResponseBody String delete(@PathVariable long taskID) throws ServiceTask.NotOwner, ServiceTask.TaskNotFound {
+        System.out.println("KICKB SERVER : Delete task : " + taskID);
+        ConfigHTTP.attenteArticifielle();
+        MUser user = currentUser(); // Obtenir l'utilisateur actuel à partir de cookies
+        serviceTask.delete(taskID, user); // Peut lancer une exception NotOwner ou TaskNotFound
+        return ""; // Succès!
+    }
+
     /**
      * Accède au Principal stocké dans la mémoire vivre (HttpSession)
      * La session de l'utilisateur est accédée grâce au  JSESSIONID qui était dans lq requête dans un cookie

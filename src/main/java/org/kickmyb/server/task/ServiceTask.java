@@ -10,6 +10,8 @@ public interface ServiceTask {
     class Existing extends Exception {}
     class TooShort extends Exception {}
     class Empty extends Exception {}
+    class TaskNotFound extends Exception {}
+    class NotOwner extends Exception {}
 
     // entity handling
     TaskDetailResponse detail(Long id, MUser user);
@@ -18,6 +20,7 @@ public interface ServiceTask {
     List<HomeItemResponse> home(Long userID);
     TaskDetailPhotoResponse detailPhoto(Long id, MUser user);
     List<HomeItemPhotoResponse> homePhoto(Long userID);
+    void delete(long taskID, MUser user) throws NotOwner, TaskNotFound;
 
     // Potential web demo for JS injection
     String index();
